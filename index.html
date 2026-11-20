@@ -164,6 +164,10 @@ h3.part { font-size: 20px; margin-top: 4px; }
 .finale.show { display: block; }
 footer { color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
 footer a { color: var(--fir); }
+footer a.board-btn { display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; margin: 6px 0; padding: 16px 26px; min-height: 56px; background: var(--accent); color: #fff; font-family: var(--font-display); font-size: 20px; font-weight: 700; text-decoration: none; border-radius: 16px; box-shadow: 0 6px 0 rgba(0,0,0,.22), 0 12px 24px rgba(0,0,0,.18); transition: transform .12s, box-shadow .12s; }
+footer a.board-btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 rgba(0,0,0,.22), 0 16px 28px rgba(0,0,0,.2); }
+footer a.board-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.22), 0 3px 8px rgba(0,0,0,.2); }
+footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset: 3px; }
 </style>
 </head>
 <body>
@@ -309,7 +313,7 @@ footer a { color: var(--fir); }
 
   <footer>
     <span>Sources: COROS support pages on <a href="https://support.coros.com/hc/en-us/articles/24181489692436-How-to-download-and-use-routes" target="_blank" rel="noopener">downloading and using routes</a> and <a href="https://support.coros.com/hc/en-us/articles/360039841072" target="_blank" rel="noopener">navigation</a>.</span>
-    <span><a href="inspiration.html">Running adventure inspiration board</a></span>
+    <a class="board-btn" href="inspiration.html">🏔️ Running adventure inspiration board →</a>
     <span>The phone in Mission 2 is a practice version. The real COROS app has more options and its screens look a little different.</span>
   </footer>
 </div>
