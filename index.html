@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forest Park Route Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a long single-column field guide; each mission is a card with one hands-on activity. Palette: Douglas fir, fog, trail-marker orange. */
+:root {
+  --bg: #eef1ec;
+  --card: #fbfcf9;
+  --ink: #17261f;
+  --muted: #566559;
+  --fir: #1f4a37;
+  --accent: #e0612b;
+  --line: #d3dacf;
+  --good: #2c7a4b;
+  --land: #e7ece0;
+  --forest: #cfdcc4;
+  --water: #b9d3df;
+  --trail: #7b5b3a;
+  --app-bg: #ffffff;
+  --app-ink: #1b1f1d;
+  --app-line: #e3e6e2;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "Figtree", "Avenir Next", "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1814; --card: #17231d; --ink: #e8efe9; --muted: #9fb1a5; --fir: #7fc3a0; --accent: #f08a57;
+    --line: #2a3b32; --good: #6fcf97; --land: #1d2b23; --forest: #263b2e; --water: #27475a; --trail: #c9a273;
+    --app-bg: #1c2420; --app-ink: #eef3ef; --app-line: #2f3b35; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1814; --card: #17231d; --ink: #e8efe9; --muted: #9fb1a5; --fir: #7fc3a0; --accent: #f08a57;
+  --line: #2a3b32; --good: #6fcf97; --land: #1d2b23; --forest: #263b2e; --water: #27475a; --trail: #c9a273;
+  --app-bg: #1c2420; --app-ink: #eef3ef; --app-line: #2f3b35; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.55; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 18px 64px; display: flex; flex-direction: column; gap: 22px; }
+header.hero { padding: 36px 0 6px; display: flex; flex-direction: column; gap: 14px; }
+.kicker { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--fir); font-weight: 600; }
+h1 { font-size: clamp(34px, 7vw, 56px); }
+.lede { color: var(--muted); max-width: 60ch; font-size: 19px; }
+.progress { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0; display: flex; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.pill { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; }
+.pill i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); display: block; }
+.pill.done { color: var(--ink); border-color: var(--good); }
+.pill.done i { background: var(--good); border-color: var(--good); }
+section.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px 20px; display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 70px; }
+.card h2 { font-size: clamp(25px, 4.5vw, 34px); }
+.mission { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.sub { color: var(--muted); max-width: 62ch; }
+.badge { display: none; align-self: flex-start; background: var(--good); color: #fff; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+.card.done .badge { display: inline-block; }
+.btn { display: inline-block; text-align: center; text-decoration: none; border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 16px; font-weight: 600; min-height: 44px; }
+.btn.primary { background: var(--fir); border-color: var(--fir); color: var(--card); }
+:root[data-theme="dark"] .btn.primary { color: #0f1814; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+/* basics */
+.chain { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.chain button { border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 12px 6px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 600; font-size: 15px; position: relative; }
+.chain button[aria-pressed="true"] { border-color: var(--accent); background: var(--card); }
+.chain button.seen::after { content: ""; position: absolute; top: 7px; right: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--good); }
+.chain svg { width: 38px; height: 38px; stroke: var(--fir); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.explain { background: var(--bg); border-radius: 14px; padding: 14px 16px; min-height: 76px; }
+/* lab */
+.lab { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (min-width: 760px) { .lab { grid-template-columns: 330px minmax(0, 1fr); } }
+.phone { width: 100%; max-width: 330px; margin: 0 auto; background: #0e1512; border-radius: 38px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+.screen { background: var(--app-bg); color: var(--app-ink); border-radius: 29px; overflow: hidden; min-height: 560px; display: flex; flex-direction: column; position: relative; }
+.status { display: flex; justify-content: space-between; padding: 10px 20px 4px; font-size: 12px; font-weight: 600; }
+.apphead { padding: 4px 16px 8px; font-family: var(--font-display); font-weight: 700; font-size: 21px; display: flex; justify-content: space-between; align-items: center; }
+.apphead small { font-family: var(--font-body); font-weight: 500; font-size: 12px; color: var(--muted); }
+.mapbox { margin: 0 10px; border-radius: 14px; overflow: hidden; border: 1px solid var(--app-line); }
+.mapbox svg { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.stats { display: flex; gap: 10px; padding: 10px 16px 0; }
+.stat { flex: 1; background: var(--land); border-radius: 12px; padding: 8px 10px; }
+.stat b { display: block; font-family: var(--font-display); font-size: 22px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.tools { display: flex; gap: 8px; padding: 10px 12px 0; flex-wrap: wrap; }
+.tools .btn { padding: 6px 12px; min-height: 40px; font-size: 14px; border-radius: 10px; background: var(--app-bg); }
+.tools .btn.primary { margin-left: auto; background: var(--accent); border-color: var(--accent); color: #fff; }
+.tabbar { margin-top: auto; display: flex; justify-content: space-around; border-top: 1px solid var(--app-line); padding: 10px 0 14px; font-size: 11px; color: var(--muted); }
+.tabbar .on { color: var(--accent); font-weight: 600; }
+.modal { position: absolute; inset: 0; background: rgba(10,16,13,.55); display: flex; align-items: flex-end; }
+.sheet { background: var(--app-bg); width: 100%; border-radius: 22px 22px 0 0; padding: 18px 16px 22px; display: flex; flex-direction: column; gap: 12px; }
+.sheet h3 { font-size: 20px; }
+.sheet input { font: inherit; padding: 10px 12px; border: 1.5px solid var(--app-line); border-radius: 10px; background: var(--app-bg); color: var(--app-ink); width: 100%; }
+.routecard { margin: 4px 14px; border: 1px solid var(--app-line); border-radius: 14px; overflow: hidden; text-align: left; background: var(--app-bg); display: block; width: calc(100% - 28px); padding: 0; }
+.routecard .meta { padding: 10px 12px; }
+.routecard .meta b { display: block; }
+.routecard .meta span { color: var(--muted); font-size: 14px; }
+.hint { position: absolute; right: 18px; top: 4px; font-size: 11px; }
+.success { margin: auto; text-align: center; padding: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.check { width: 64px; height: 64px; border-radius: 50%; background: var(--good); display: grid; place-items: center; color: #fff; font-size: 34px; }
+.coach { background: var(--fir); color: var(--card); border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+:root[data-theme="dark"] .coach { color: #0f1814; }
+.coach .stepno { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; font-weight: 600; }
+.coach h3 { font-size: 22px; }
+.sidecol { display: flex; flex-direction: column; gap: 14px; }
+.note { font-size: 15px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; }
+.goal { display: flex; gap: 10px; align-items: center; font-size: 15px; background: var(--bg); padding: 10px 14px; border-radius: 12px; }
+.goal .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
+.goal.met .dot { background: var(--good); border-color: var(--good); }
+/* order game */
+.order { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 700px) { .order { grid-template-columns: 1fr 1fr; } }
+.slots, .pool { display: flex; flex-direction: column; gap: 8px; }
+.slot { border: 2px dashed var(--line); border-radius: 12px; padding: 10px 14px; min-height: 54px; display: flex; gap: 10px; align-items: center; font-size: 16px; }
+.slot.filled { border-style: solid; border-color: var(--good); background: var(--bg); }
+.slot .n { font-family: var(--font-display); font-weight: 700; color: var(--accent); width: 20px; flex: none; }
+.pool button { text-align: left; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 12px 14px; min-height: 54px; }
+.pool button.used { opacity: .3; pointer-events: none; }
+.shake { animation: shake .35s; border-color: var(--accent) !important; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; } }
+.msg { min-height: 26px; font-weight: 500; }
+.routebox { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (min-width: 760px) { .routebox { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); } }
+.routemap { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.routemap svg { display: block; width: 100%; height: auto; }
+.routeside { display: flex; flex-direction: column; gap: 12px; }
+.routeside h3 { font-size: 22px; }
+.stats2 { display: flex; gap: 10px; }
+.stats2 .stat { background: var(--bg); }
+h3.part { font-size: 20px; margin-top: 4px; }
+.trouble { border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; background: var(--bg); }
+.trouble summary { cursor: pointer; font-weight: 600; }
+.trouble p { margin-top: 10px; font-size: 16px; }
+.trouble a { color: var(--fir); }
+/* checklists */
+.checks { display: flex; flex-direction: column; gap: 8px; }
+.checks label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); cursor: pointer; }
+.checks input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--good); flex: none; }
+.checks label:has(input:checked) { border-color: var(--good); }
+/* destinations */
+.dests { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.dest { text-align: left; border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; background: var(--bg); display: flex; flex-direction: column; gap: 6px; }
+.dest[aria-pressed="true"] { border-color: var(--accent); background: var(--card); box-shadow: 0 0 0 2px var(--accent) inset; }
+.dest h3 { font-size: 19px; }
+.dest .tag { font-size: 13px; font-weight: 600; color: var(--fir); }
+.dest p { font-size: 15px; color: var(--muted); }
+.brief { background: var(--bg); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.finale { display: none; background: var(--fir); color: var(--card); border-radius: 16px; padding: 18px; }
+:root[data-theme="dark"] .finale { color: #0f1814; }
+.finale.show { display: block; }
+footer { color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+footer a { color: var(--fir); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">Route Lab for the COROS Apex 4</div>
+    <h1>Draw a route. Send it to your watch. Go run it.</h1>
+    <p class="lede">Five short missions on a practice map of Forest Park. Nothing you tap here can break anything, so poke around. The last mission is a real one: build a run somewhere beautiful beyond the city, including a big point-to-point on Mount Hood and a sunny winter run on the dry east side of the Gorge.</p>
+  </header>
+
+  <nav class="progress" id="progress" aria-label="Progress"></nav>
+
+  <!-- MISSION 1 -->
+  <section class="card" id="m-basics">
+    <div class="mission">Mission 1 · The big picture</div>
+    <h2>Four things, one trip</h2>
+    <p class="sub">A route travels from a map to your wrist in four hops. Tap each one to see what it does.</p>
+    <span class="badge">Done</span>
+    <div class="chain" id="chain"></div>
+    <div class="explain" id="explain" aria-live="polite">Tap a piece to read about it.</div>
+  </section>
+
+  <!-- MISSION 2 -->
+  <section class="card" id="m-build">
+    <div class="mission">Mission 2 · Build in the COROS app</div>
+    <h2>Draw a 3 mile run through the forest</h2>
+    <p class="sub">This practice phone behaves like the real flow: draw on the map, save the route, find it in your Route Library, then sync it to the watch. The map is a simplified sketch of Forest Park, not for navigation.</p>
+    <span class="badge">Done</span>
+    <div class="lab">
+      <div class="phone"><div class="screen" id="screen"></div></div>
+      <div class="sidecol">
+        <div class="coach" aria-live="polite"><div class="stepno" id="stepno"></div><h3 id="coachTitle"></h3><p id="coachText"></p></div>
+        <div class="goal" id="goal"><span class="dot"></span><span>Goal: a route of at least 3 miles that you send to your watch.</span></div>
+        <p class="note">Try turning on "Snap" so your points jump onto the nearest trail. Real route builders do the same, which keeps you off cliffs and out of blackberries.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISSION 3 -->
+  <section class="card" id="m-import">
+    <div class="mission">Mission 3 · Load a real route</div>
+    <h2>Put this route on your watch and in your favorite app</h2>
+    <p class="sub">Here is a ready-made route, drawn in onX Maps and saved as a GPX file. Download it, send it to your Apex 4 through the COROS app, then open the same file in whatever mapping software you like best.</p>
+    <span class="badge">Done</span>
+    <div class="routebox">
+      <div class="routemap" id="routemap"></div>
+      <div class="routeside">
+        <h3>White Salmon Lazy River</h3>
+        <div class="stats2"><div class="stat"><b id="rtMiles">0</b><span>miles</span></div><div class="stat"><b id="rtPts">0</b><span>points</span></div></div>
+        <a class="btn primary dl" id="dlBtn" href="white-salmon-lazy-river.gpx" download="white-salmon-lazy-river.gpx">Download route file</a>
+        <p class="note" id="dlMsg" aria-live="polite">The file ends in .gpx. On a phone, you may need to choose Save to Files.</p>
+      </div>
+    </div>
+    <h3 class="part">Part A · Send it to your watch</h3>
+    <div class="checks" id="loadA"></div>
+    <h3 class="part">Part B · Open it in your own software</h3>
+    <div class="checks" id="loadB"></div>
+    <details class="trouble">
+      <summary>If something looks off</summary>
+      <p><b>No elevation on the watch or in the app.</b> This file has no elevation data. COROS has a fix: <a href="https://support.coros.com/hc/en-us/articles/15405567227028" target="_blank" rel="noopener">No Elevation Data After Importing GPX</a>.</p>
+      <p><b>COROS is not in the list of apps.</b> Open the COROS app first, then try the file again from the Files app with the Share button. If it still does not show up, ask Max.</p>
+      <p><b>The route looks strange at one end.</b> That is normal for this one. It was drawn by hand on a map, so a few stretches are straight lines.</p>
+    </details>
+  </section>
+
+  <!-- MISSION 4 -->
+  <section class="card" id="m-watch">
+    <div class="mission">Mission 4 · Check the watch</div>
+    <h2>Make sure it arrived</h2>
+    <p class="sub">Before you leave the car, run through this list. Tick each one as you do it.</p>
+    <span class="badge">Done</span>
+    <div class="checks" id="watchChecks"></div>
+    <p class="note">The exact buttons on the watch can change with software updates. COROS keeps the current steps in its <a href="https://support.coros.com/hc/en-us/articles/360039841072" target="_blank" rel="noopener">navigation guide</a>.</p>
+  </section>
+
+  <!-- MISSION 5 -->
+  <section class="card" id="m-challenge">
+    <div class="mission">Mission 5 · The challenge</div>
+    <h2>Pick a challenge and build it</h2>
+    <p class="sub">Three routes: home turf, a big mountain day, and a sunny winter run. Drive times are my rough estimates from the NW Portland trailheads, so check a map for your day, and check trail conditions before you go.</p>
+    <span class="badge">Done</span>
+    <div class="dests" id="dests"></div>
+    <div class="brief" id="brief" hidden>
+      <h3 id="briefTitle"></h3>
+      <p id="briefText"></p>
+      <div class="checks" id="challengeChecks"></div>
+    </div>
+    <div class="finale" id="finale"><h3>Trail ready.</h3><p style="margin-top:6px">You built it, sent it and checked it. Send a screenshot of the route to the family group chat, then go run it.</p></div>
+  </section>
+
+  <footer>
+    <span>Sources: COROS support pages on <a href="https://support.coros.com/hc/en-us/articles/24181489692436-How-to-download-and-use-routes" target="_blank" rel="noopener">downloading and using routes</a> and <a href="https://support.coros.com/hc/en-us/articles/360039841072" target="_blank" rel="noopener">navigation</a>.</span>
+    <span>The phone in Mission 2 is a practice version. The real COROS app has more options and its screens look a little different.</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var KEY = "routeLab.v1";
+  var prog = { basics: false, build: false, load: false, watch: false, challenge: false, checks: {}, watchChecks: {}, loadA: {}, loadB: {}, dest: "" };
+  try { var s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s) prog = Object.assign(prog, s); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch (e) {} }
+  function $(id) { return document.getElementById(id); }
+
+  var STEPS = [
+    ["basics", "Big picture", "m-basics"], ["build", "Build", "m-build"], ["load", "Real route", "m-import"],
+    ["watch", "Watch", "m-watch"], ["challenge", "Challenge", "m-challenge"]
+  ];
+  function renderProgress() {
+    $("progress").innerHTML = STEPS.map(function (s) {
+      return '<a class="pill ' + (prog[s[0]] ? "done" : "") + '" href="#' + s[2] + '"><i></i>' + s[1] + "</a>";
+    }).join("");
+    STEPS.forEach(function (s) { $(s[2]).classList.toggle("done", !!prog[s[0]]); });
+  }
+  function complete(k) { if (!prog[k]) { prog[k] = true; save(); } renderProgress(); }
+
+  /* ---------- Mission 1 ---------- */
+  var PIECES = [
+    ["Route", "<path d='M6 30 C14 8 24 38 32 12'/><circle cx='6' cy='30' r='3'/><circle cx='32' cy='12' r='3'/>", "A line on a map that shows where you want to run. You can draw one yourself or borrow one from a site like AllTrails or Strava."],
+    ["GPX file", "<rect x='9' y='5' width='20' height='28' rx='3'/><path d='M14 15h10M14 21h10M14 27h6'/>", "A small file that stores the line as a list of GPS points. Nearly every mapping site can export one, which makes it the common language between apps."],
+    ["COROS app", "<rect x='11' y='4' width='16' height='30' rx='4'/><path d='M17 29h4'/>", "The middle step. Routes you save land in your Route Library, and from there you send them to the watch. Opening a GPX file with the COROS app saves it here."],
+    ["Apex 4", "<circle cx='19' cy='19' r='10'/><path d='M14 6l1-3h8l1 3M14 32l1 3h8l1-3M19 14v5l3 2'/>", "Your watch holds about 10 routes at a time. Choose a Run or Trail Run activity and it can guide you along the line while you go."]
+  ];
+  var seen = {};
+  function renderChain() {
+    $("chain").innerHTML = PIECES.map(function (p, i) {
+      return '<button type="button" data-i="' + i + '" aria-pressed="false"><svg viewBox="0 0 38 38" aria-hidden="true">' + p[1] + "</svg>" + p[0] + "</button>";
+    }).join("");
+    $("chain").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      var i = +b.dataset.i; seen[i] = true;
+      Array.prototype.forEach.call($("chain").children, function (c) { c.setAttribute("aria-pressed", c === b ? "true" : "false"); });
+      b.classList.add("seen");
+      $("explain").innerHTML = "<b>" + PIECES[i][0] + ".</b> " + PIECES[i][2];
+      if (Object.keys(seen).length === 4) complete("basics");
+    });
+  }
+
+  /* ---------- Mission 2: practice phone ---------- */
+  var W = 800, H = 520, PX_PER_MI = 100;
+  var TRAILS = {
+    "Wildwood Trail": [[30,120],[110,95],[190,130],[270,108],[350,140],[430,112],[520,150],[600,118],[690,140],[770,105]],
+    "Leif Erikson Dr": [[30,285],[120,262],[210,300],[300,272],[390,305],[480,278],[570,312],[660,282],[770,300]],
+    "Firelane 1": [[190,130],[205,205],[210,300]],
+    "Firelane 3": [[350,140],[372,220],[390,305]],
+    "Firelane 5": [[520,150],[540,235],[570,312]],
+    "Saltzman Rd": [[690,140],[680,215],[660,282]],
+    "Lower Macleay": [[110,95],[100,180],[120,262]]
+  };
+  var dense = [];
+  Object.keys(TRAILS).forEach(function (k) {
+    var t = TRAILS[k];
+    for (var i = 0; i < t.length - 1; i++) {
+      var a = t[i], b = t[i + 1], n = Math.max(2, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 4));
+      for (var j = 0; j <= n; j++) dense.push([a[0] + (b[0] - a[0]) * j / n, a[1] + (b[1] - a[1]) * j / n]);
+    }
+  });
+  function snap(p) {
+    var best = null, bd = 28;
+    dense.forEach(function (d) { var r = Math.hypot(d[0] - p[0], d[1] - p[1]); if (r < bd) { bd = r; best = d; } });
+    return best ? [best[0], best[1]] : p;
+  }
+  function elev(x, y) { return Math.max(30, 1050 - y * 1.9 + 70 * Math.sin(x / 70) + 40 * Math.sin(y / 35 + x / 120)); }
+  function sampleRoute(pts) {
+    var out = [], d = 0;
+    for (var i = 0; i < pts.length - 1; i++) {
+      var a = pts[i], b = pts[i + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(len / 5));
+      for (var j = 0; j < n; j++) {
+        var x = a[0] + (b[0] - a[0]) * j / n, y = a[1] + (b[1] - a[1]) * j / n;
+        out.push([d + len * j / n / PX_PER_MI, elev(x, y)]);
+      }
+      d += len / PX_PER_MI;
+    }
+    var l = pts[pts.length - 1]; out.push([d, elev(l[0], l[1])]);
+    return out;
+  }
+  function stats(pts) {
+    if (pts.length < 2) return { mi: 0, gain: 0, prof: [] };
+    var prof = sampleRoute(pts), gain = 0;
+    for (var i = 1; i < prof.length; i++) { var dz = prof[i][1] - prof[i - 1][1]; if (dz > 0) gain += dz; }
+    return { mi: prof[prof.length - 1][0], gain: Math.round(gain / 10) * 10, prof: prof };
+  }
+  function mapSVG(pts, interactive) {
+    var s = '<svg viewBox="0 0 ' + W + " " + H + '" id="' + (interactive ? "map" : "") + '" role="img" aria-label="Practice map of Forest Park">';
+    s += '<rect width="800" height="520" fill="var(--land)"/>';
+    s += '<path d="M0 0H800V70C700 55 600 85 500 66C400 48 300 80 200 62C120 48 60 70 0 64Z" fill="var(--forest)" opacity=".0"/>';
+    s += '<path d="M0 60C100 40 200 78 330 58C460 36 600 76 800 50V400C700 380 560 410 420 392C280 374 140 410 0 388Z" fill="var(--forest)"/>';
+    s += '<path d="M0 440C140 420 280 462 440 440C600 418 700 450 800 432V520H0Z" fill="var(--water)"/>';
+    s += '<path d="M0 408H800" stroke="var(--trail)" stroke-width="3" stroke-dasharray="10 6" opacity=".6"/>';
+    [180, 230, 340].forEach(function (y, i) { s += '<path d="M0 ' + y + "C200 " + (y - 22) + " 400 " + (y + 22) + " 800 " + (y - 8) + '" fill="none" stroke="var(--trail)" stroke-width="1" opacity=".25"/>'; });
+    Object.keys(TRAILS).forEach(function (k) {
+      s += '<polyline points="' + TRAILS[k].map(function (p) { return p.join(","); }).join(" ") + '" fill="none" stroke="var(--trail)" stroke-width="' + (k === "Wildwood Trail" ? 4 : 3) + '" stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>';
+    });
+    s += '<g font-size="15" fill="var(--muted)" font-family="Figtree, sans-serif" font-weight="600"><text x="40" y="82">Wildwood Trail</text><text x="40" y="332">Leif Erikson Dr</text><text x="590" y="394" >Hwy 30</text><text x="40" y="490">Willamette River</text><text x="555" y="46">Ridge · about 1,000 ft</text></g>';
+    s += '<g font-size="13" fill="var(--ink)" font-family="Figtree, sans-serif"><circle cx="110" cy="95" r="5" fill="var(--ink)"/><text x="118" y="76">Lower Macleay</text><circle cx="30" cy="285" r="5" fill="var(--ink)"/><text x="40" y="268">Thurman St trailhead</text></g>';
+    if (pts.length) {
+      s += '<polyline points="' + pts.map(function (p) { return p[0].toFixed(0) + "," + p[1].toFixed(0); }).join(" ") + '" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>';
+      pts.forEach(function (p, i) {
+        if (i === 0) s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="10" fill="var(--good)" stroke="#fff" stroke-width="3"/>';
+        else if (i === pts.length - 1) s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="10" fill="var(--accent)" stroke="#fff" stroke-width="3"/>';
+        else if (interactive) s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="4" fill="#fff" stroke="var(--accent)" stroke-width="2"/>';
+      });
+    }
+    return s + "</svg>";
+  }
+  function profileSVG(prof) {
+    if (prof.length < 2) return "";
+    var maxD = prof[prof.length - 1][0] || 1, lo = 1e9, hi = 0;
+    prof.forEach(function (p) { lo = Math.min(lo, p[1]); hi = Math.max(hi, p[1]); });
+    lo = Math.floor(lo / 50) * 50; hi = Math.max(lo + 100, Math.ceil(hi / 50) * 50);
+    var w = 280, h = 80, pts = prof.map(function (p) { return (p[0] / maxD * w).toFixed(1) + "," + (h - (p[1] - lo) / (hi - lo) * h).toFixed(1); });
+    return '<svg viewBox="0 0 ' + (w + 40) + " " + (h + 22) + '" style="width:100%;height:auto" role="img" aria-label="Elevation profile from ' + Math.round(lo) + " to " + Math.round(hi) + ' feet"><g transform="translate(34,6)">' +
+      '<line x1="0" x2="' + w + '" y1="' + h + '" y2="' + h + '" stroke="var(--app-line)"/><line x1="0" x2="' + w + '" y1="0" y2="0" stroke="var(--app-line)"/>' +
+      '<polygon points="0,' + h + " " + pts.join(" ") + " " + w + "," + h + '" fill="var(--accent)" opacity=".18"/><polyline points="' + pts.join(" ") + '" fill="none" stroke="var(--accent)" stroke-width="2.5"/>' +
+      '<text x="-4" y="4" font-size="10" text-anchor="end" fill="var(--muted)">' + hi + '</text><text x="-4" y="' + (h + 3) + '" font-size="10" text-anchor="end" fill="var(--muted)">' + lo + '</text>' +
+      '<text x="' + w + '" y="' + (h + 16) + '" font-size="10" text-anchor="end" fill="var(--muted)">' + maxD.toFixed(1) + " mi</text></g></svg>";
+  }
+
+  var st = { stage: "draw", pts: [], snap: true, name: "Forest Park loop" };
+  var COACH = {
+    draw: ["Step 1 of 5", "Draw your route", "Tap the map to drop points. The green dot is your start. Keep going until the stats say 3 miles or more, then tap Save."],
+    name: ["Step 2 of 5", "Name it", "Pick a name you will recognize later, like the place and the distance. Then tap Save."],
+    library: ["Step 3 of 5", "Find it in your Route Library", "Every saved route lives here. On the real app, this is on the Explore page. Tap your route to open it."],
+    detail: ["Step 4 of 5", "Check the profile, then sync", "The orange profile shows climbing along the way. When you are happy, tap Sync with your device."],
+    send: ["Step 5 of 5", "Send it", "The app lists your connected watch. Tap Send and keep the watch near your phone."],
+    done: ["Finished", "It is on the watch", "That is the whole trip. Press Start over to try a different route, or move on to Mission 3."]
+  };
+  function say() {
+    var c = COACH[st.stage]; $("stepno").textContent = c[0]; $("coachTitle").textContent = c[1]; $("coachText").textContent = c[2];
+  }
+  function phone() {
+    var S = stats(st.pts), h = "";
+    h += '<div class="status"><span>9:41</span><span>COROS</span></div>';
+    if (st.stage === "draw" || st.stage === "name") {
+      h += '<div class="apphead">Explore<small>New route</small></div><div class="mapbox">' + mapSVG(st.pts, true) + "</div>";
+      h += '<div class="stats"><div class="stat"><b>' + S.mi.toFixed(1) + '</b><span>miles</span></div><div class="stat"><b>' + S.gain + '</b><span>ft climbing</span></div></div>';
+      h += '<div class="tools"><button class="btn" id="undo">Undo</button><button class="btn" id="clear">Clear</button><button class="btn" id="snapBtn" aria-pressed="' + st.snap + '">Snap: ' + (st.snap ? "on" : "off") + '</button><button class="btn primary" id="saveBtn"' + (S.mi < 0.5 ? " disabled" : "") + ">Save</button></div>";
+      h += '<div class="tabbar"><span>Today</span><span class="on">Explore</span><span>Activities</span><span>Profile</span></div>';
+      if (st.stage === "name") h += '<div class="modal"><div class="sheet"><h3>Save route</h3><label for="rname" style="font-size:13px;color:var(--muted)">Route name</label><input id="rname" value="' + st.name.replace(/"/g, "&quot;") + '" maxlength="40"><button class="btn primary" id="nameOk">Save</button></div></div>';
+    } else if (st.stage === "library") {
+      h += '<div class="apphead">Route Library<small>1 route</small></div><button class="routecard" id="openRoute"><div style="pointer-events:none">' + mapSVG(st.pts, false) + '</div><div class="meta"><b>' + st.name.replace(/</g, "&lt;") + "</b><span>" + S.mi.toFixed(1) + " mi · " + S.gain + " ft climbing</span></div></button>";
+      h += '<div class="tabbar"><span>Today</span><span class="on">Explore</span><span>Activities</span><span>Profile</span></div>';
+    } else if (st.stage === "detail" || st.stage === "send") {
+      h += '<div class="apphead">' + st.name.replace(/</g, "&lt;") + "<small>" + S.mi.toFixed(1) + " mi</small></div><div class=\"mapbox\">" + mapSVG(st.pts, false) + '</div><div style="padding:8px 14px 0"><div style="font-size:12px;color:var(--muted)">Elevation profile · ' + S.gain + " ft climbing</div>" + profileSVG(S.prof) + "</div>";
+      h += '<div class="tools"><button class="btn primary" id="syncBtn" style="margin-left:0;flex:1">Sync with your device</button></div><div class="tabbar"><span>Today</span><span class="on">Explore</span><span>Activities</span><span>Profile</span></div>';
+      if (st.stage === "send") h += '<div class="modal"><div class="sheet"><h3>Send to a device</h3><div style="display:flex;justify-content:space-between;align-items:center;border:1.5px solid var(--good);border-radius:12px;padding:12px"><b>COROS APEX 4</b><span style="color:var(--good);font-size:13px">Connected</span></div><button class="btn primary" id="sendBtn">Send</button></div></div>';
+    } else {
+      h += '<div class="success"><div class="check" aria-hidden="true">&#10003;</div><h3 style="font-size:22px">Sent to your watch</h3><p style="color:var(--muted)">' + st.name.replace(/</g, "&lt;") + " is ready. Open a Run activity on the watch to follow it.</p><button class=\"btn\" id=\"again\">Start over</button></div>";
+    }
+    $("screen").innerHTML = h; say();
+    $("goal").classList.toggle("met", prog.build);
+    var map = $("map");
+    if (map) map.addEventListener("click", function (e) {
+      var r = map.getBoundingClientRect(), p = [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H];
+      if (st.snap) p = snap(p);
+      st.pts.push(p); phone();
+    });
+    bind("undo", function () { st.pts.pop(); phone(); });
+    bind("clear", function () { st.pts = []; phone(); });
+    bind("snapBtn", function () { st.snap = !st.snap; phone(); });
+    bind("saveBtn", function () { st.stage = "name"; phone(); var i = $("rname"); if (i) i.focus(); });
+    bind("nameOk", function () { st.name = ($("rname").value || "My route").trim() || "My route"; st.stage = "library"; phone(); });
+    bind("openRoute", function () { st.stage = "detail"; phone(); });
+    bind("syncBtn", function () { st.stage = "send"; phone(); });
+    bind("sendBtn", function () { st.stage = "done"; if (S.mi >= 3) complete("build"); phone(); if (S.mi < 3) $("coachText").textContent = "Sent! The goal asks for 3 miles or more though. Start over and stretch the route to unlock the badge."; });
+    bind("again", function () { st.stage = "draw"; st.pts = []; phone(); });
+  }
+  function bind(id, fn) { var el = $(id); if (el) el.addEventListener("click", fn); }
+
+  /* ---------- Mission 3: real route ---------- */
+  var RT = [4571080,-12136023,4571042,-12136201,4571057,-12136209,4571086,-12136248,4571106,-12136283,4571138,-12136325,4571179,-12136408,4571221,-12136473,4571230,-12136490,4571239,-12136487,4571246,-12136477,4571260,-12136462,4571272,-12136453,4571274,-12136455,4571275,-12136461,4571289,-12136464,4571297,-12136469,4571304,-12136470,4571315,-12136465,4571343,-12136470,4571353,-12136464,4571359,-12136470,4571364,-12136486,4571375,-12136497,4571377,-12136504,4571387,-12136522,4571388,-12136532,4571395,-12136547,4571394,-12136555,4571390,-12136561,4571390,-12136570,4571401,-12136581,4571403,-12136586,4571402,-12136601,4571457,-12136538,4571475,-12136578,4571497,-12136604,4571536,-12136625,4571580,-12136635,4571643,-12136664,4571652,-12136672,4571669,-12136696,4571683,-12136707,4571715,-12136741,4571750,-12136804,4571777,-12136827,4571821,-12136884,4571846,-12136931,4571855,-12136961,4571859,-12136986,4571873,-12137019,4571910,-12137080,4571935,-12137139,4571973,-12137200,4572009,-12137242,4572028,-12137271,4572059,-12137337,4572100,-12137389,4572108,-12137403,4572120,-12137428,4572144,-12137491,4572164,-12137530,4572191,-12137591,4572197,-12137613,4572217,-12137651,4572234,-12137714,4572246,-12137746,4572285,-12137806,4572293,-12137826,4572319,-12137870,4572343,-12137904,4572363,-12137939,4572421,-12137994,4572475,-12138063,4572497,-12138074,4572520,-12138078,4572526,-12138081,4572546,-12138094,4572554,-12138103,4572554,-12138147,4572539,-12138173,4572534,-12138178,4572494,-12138193,4572475,-12138195,4572462,-12138193,4572449,-12138182,4572424,-12138146,4572386,-12138098,4572337,-12138019,4572322,-12138007,4572316,-12138005,4572310,-12138006,4572280,-12138031,4572253,-12138057,4572195,-12138118,4572179,-12138141,4572172,-12138165,4572170,-12138194,4572169,-12138275,4572171,-12138345,4572173,-12138365,4572182,-12138404,4572186,-12138414,4572201,-12138435,4572221,-12138457,4572243,-12138497,4572247,-12138511,4572246,-12138522,4572241,-12138530,4572233,-12138533,4572214,-12138529,4572198,-12138522,4572192,-12138515,4572172,-12138478,4572161,-12138465,4572139,-12138445,4572133,-12138435,4572118,-12138402,4572087,-12138380,4572080,-12138378,4572069,-12138380,4572033,-12138394,4572026,-12138403,4572019,-12138419,4572007,-12138457,4571999,-12138476,4571978,-12138506,4571966,-12138535,4571960,-12138544,4571953,-12138549,4571940,-12138553,4571914,-12138555,4571900,-12138561,4571876,-12138583,4571864,-12138604,4571847,-12138684,4571837,-12138768,4571821,-12138836,4571817,-12138866,4571818,-12138900,4571826,-12138946,4571829,-12138959,4571841,-12138981,4571848,-12139003,4571852,-12139027,4571852,-12139046,4571843,-12139082,4571841,-12139098,4571837,-12139103,4571822,-12139093,4571776,-12139072,4571715,-12139034,4571711,-12139036,4571708,-12139040,4571706,-12139049,4571706,-12139068,4571698,-12139122,4571689,-12139152,4571683,-12139159,4571677,-12139163,4571668,-12139165,4571658,-12139172,4571646,-12139174,4571617,-12139170,4571609,-12139173,4571601,-12139181,4571595,-12139190,4571589,-12139215,4571587,-12139234,4571589,-12139277,4571593,-12139308,4571613,-12139401,4571619,-12139444,4571623,-12139459,4571632,-12139477,4571641,-12139490,4571656,-12139501,4571675,-12139508,4571679,-12139517,4571681,-12139538,4571694,-12139582,4571703,-12139624,4571704,-12139676,4571708,-12139705,4571705,-12139722,4571700,-12139726,4571689,-12139724,4571679,-12139719,4571674,-12139713,4571658,-12139683,4571649,-12139672,4571641,-12139668,4571632,-12139668,4571625,-12139673,4571612,-12139688,4571602,-12139717,4571617,-12139718,4571627,-12139728,4571639,-12139748,4571656,-12139769,4571683,-12139795,4571714,-12139840,4571720,-12139859,4571723,-12139940,4571728,-12139968,4571727,-12139996,4571733,-12140036,4571734,-12140080,4571728,-12140089,4571721,-12140089,4571717,-12140091,4571716,-12140102,4571724,-12140130,4571727,-12140191,4571732,-12140221,4571740,-12140245,4571743,-12140262,4571746,-12140299,4571753,-12140323,4571760,-12140333,4571772,-12140341,4571804,-12140346,4571815,-12140352,4571831,-12140370,4571854,-12140389,4571876,-12140413,4571880,-12140422,4571878,-12140427,4571865,-12140441,4571856,-12140456,4571850,-12140477,4571850,-12140491,4571853,-12140511,4571861,-12140542,4571864,-12140563,4571863,-12140575,4571858,-12140585,4571852,-12140592,4571830,-12140610,4571823,-12140620,4571805,-12140659,4571803,-12140669,4571803,-12140762,4571806,-12140780,4571813,-12140868,4571823,-12140914,4571830,-12140930,4571831,-12140948,4571829,-12140959,4571825,-12140967,4571780,-12140997,4571768,-12141008,4571742,-12141041,4571735,-12141078,4571709,-12141078,4571694,-12141073,4571683,-12141059,4571660,-12141046,4571653,-12141046,4571641,-12141054,4571628,-12141046,4571615,-12141030,4571566,-12141003,4571551,-12141005,4571525,-12141003,4571494,-12140978,4571478,-12140973,4571456,-12140956,4571384,-12140890,4571364,-12140858,4571354,-12140815,4571311,-12140740,4571231,-12140617,4571230,-12140584,4571205,-12140588,4571202,-12140584,4571181,-12140568,4571169,-12140551,4571140,-12140520,4571118,-12140508,4571103,-12140493,4571076,-12140456,4571056,-12140424,4571040,-12140406,4571020,-12140368,4571004,-12140353,4570990,-12140326,4570971,-12140282,4570944,-12140243,4570927,-12140232,4570863,-12140236,4570842,-12140231,4570812,-12140206,4570784,-12140188,4570753,-12140161,4570679,-12140122,4570628,-12140071,4570595,-12140045,4570588,-12140028,4570583,-12140003,4570573,-12139986,4570558,-12139987,4570526,-12140015,4570514,-12140011,4570500,-12140039,4570485,-12140059,4570476,-12140067,4570468,-12140066,4570454,-12140056,4570437,-12140053,4570421,-12140047,4570411,-12140032,4570402,-12140024,4570390,-12140026,4570353,-12140018,4570346,-12140015,4570344,-12140008,4570340,-12140002,4570335,-12140000,4570324,-12140003,4570306,-12140002,4570294,-12140013,4570287,-12140012,4570261,-12140003,4570253,-12140004,4570236,-12139993,4570234,-12139990,4570229,-12139988,4570224,-12139989,4570220,-12139987,4570215,-12139989,4570212,-12139985,4570202,-12139982,4570195,-12139978,4570185,-12139976,4570167,-12139978,4570159,-12139974,4570157,-12139968,4570148,-12139966,4570139,-12139970,4570134,-12139966,4570134,-12139959,4570127,-12139954,4570110,-12139962,4570106,-12139960,4570104,-12139952,4570096,-12139946,4570095,-12139939,4570097,-12139927,4570106,-12139912,4570112,-12139912,4570120,-12139906,4570135,-12139880,4570139,-12139863,4570138,-12139845,4570134,-12139833,4570128,-12139827,4570119,-12139827,4570107,-12139821,4570092,-12139798,4570080,-12139788,4570063,-12139781,4570057,-12139783,4570045,-12139796,4570038,-12139792,4570036,-12139787,4570040,-12139777,4570041,-12139759,4570045,-12139745,4570031,-12139735,4570025,-12139733,4570020,-12139741,4570013,-12139745,4570010,-12139749,4569993,-12139759,4569985,-12139774,4569962,-12139767,4569954,-12139755,4569947,-12139738,4569944,-12139737,4569937,-12139742,4569935,-12139741,4569935,-12139737,4569944,-12139725,4569960,-12139694,4569966,-12139668,4569933,-12139679,4569917,-12139695,4569909,-12139699,4569900,-12139682,4569902,-12139662,4569926,-12139571,4569947,-12139535,4569950,-12139519,4569950,-12139490,4569953,-12139476,4569986,-12139407,4570007,-12139378,4570014,-12139353,4570023,-12139331,4570035,-12139323,4570050,-12139310,4570064,-12139305,4570077,-12139303,4570095,-12139312,4570111,-12139333,4570120,-12139337,4570150,-12139336,4570158,-12139331,4570164,-12139320,4570169,-12139315,4570173,-12139315,4570183,-12139327,4570189,-12139330,4570196,-12139326,4570199,-12139317,4570199,-12139305,4570205,-12139288,4570206,-12139279,4570194,-12139199,4570207,-12139140,4570229,-12139115,4570250,-12139088,4570238,-12139038,4570247,-12139020,4570246,-12139013,4570238,-12138999,4570242,-12138980,4570243,-12138978,4570252,-12138979,4570259,-12138977,4570268,-12138969,4570273,-12138967,4570277,-12138957,4570282,-12138955,4570288,-12138948,4570302,-12138938,4570325,-12138910,4570335,-12138903,4570347,-12138901,4570352,-12138897,4570367,-12138898,4570373,-12138902,4570386,-12138916,4570400,-12138924,4570429,-12138959,4570433,-12138986,4570436,-12138990,4570440,-12138995,4570452,-12138997,4570463,-12139004,4570470,-12139014,4570470,-12139016,4570465,-12139018,4570455,-12139016,4570444,-12139021,4570436,-12139027,4570436,-12139031,4570455,-12139038,4570483,-12139061,4570492,-12139066,4570500,-12139075,4570508,-12139075,4570511,-12139079,4570517,-12139098,4570521,-12139105,4570535,-12139107,4570545,-12139112,4570562,-12139110,4570568,-12139107,4570575,-12139106,4570593,-12139108,4570601,-12139105,4570603,-12139095,4570610,-12139087,4570614,-12139085,4570620,-12139087,4570666,-12139072,4570681,-12139070,4570686,-12139070,4570698,-12139077,4570703,-12139078,4570710,-12139075,4570721,-12139077,4570739,-12139089,4570746,-12139092,4570761,-12139091,4570774,-12139093,4570784,-12139090,4570794,-12139091,4570801,-12139090,4570828,-12139055,4570838,-12139032,4570851,-12139029,4570858,-12139033,4570873,-12139034,4570882,-12139022,4570899,-12139006,4570902,-12138998,4570908,-12138951,4570913,-12138939,4570919,-12138930,4570922,-12138929,4570925,-12138930,4570928,-12138938,4570934,-12138968,4570944,-12138988,4570950,-12138995,4570968,-12138996,4570989,-12138992,4570996,-12138994,4571015,-12138994,4571018,-12139000,4571016,-12139005,4571005,-12139012,4571004,-12139015,4571005,-12139019,4571026,-12139045,4571026,-12139051,4571021,-12139054,4570994,-12139062,4570981,-12139073,4570976,-12139081,4570975,-12139094,4570978,-12139103,4570989,-12139117,4570998,-12139123,4571005,-12139122,4571017,-12139115,4571035,-12139111,4571047,-12139102,4571050,-12139091,4571058,-12139084,4571064,-12139073,4571072,-12139070,4571088,-12139068,4571093,-12139064,4571098,-12139056,4571100,-12139044,4571093,-12139016,4571093,-12139006,4571109,-12138981,4571114,-12138965,4571126,-12138946,4571142,-12138932,4571154,-12138926,4571176,-12138924,4571198,-12138913,4571241,-12138882,4571247,-12138881,4571259,-12138874,4571298,-12138809,4571312,-12138800,4571315,-12138794,4571318,-12138776,4571332,-12138739,4571345,-12138711,4571382,-12138669,4571385,-12138663,4571387,-12138653,4571387,-12138623,4571391,-12138593,4571391,-12138574,4571406,-12138501,4571412,-12138490,4571452,-12138461,4571484,-12138451,4571508,-12138456,4571518,-12138447,4571552,-12138463,4571563,-12138456,4571567,-12138447,4571569,-12138437,4571559,-12138405,4571556,-12138384,4571566,-12138336,4571571,-12138317,4571588,-12138288,4571600,-12138259,4571606,-12138249,4571619,-12138239,4571624,-12138232,4571629,-12138207,4571614,-12138231,4571597,-12138244,4571590,-12138254,4571579,-12138261,4571573,-12138270,4571571,-12138270,4571571,-12138255,4571568,-12138256,4571540,-12138289,4571534,-12138292,4571526,-12138288,4571522,-12138281,4571522,-12138271,4571540,-12138241,4571552,-12138227,4571560,-12138211,4571560,-12138206,4571552,-12138193,4571547,-12138211,4571544,-12138213,4571541,-12138211,4571532,-12138192,4571351,-12137557,4571370,-12137415,4571167,-12137097,4571219,-12136542,4571072,-12136041];
+  function haversine(a, b) {
+    var R = 3958.8, r = Math.PI / 180, dp = (b[0] - a[0]) * r, dl = (b[1] - a[1]) * r;
+    var h = Math.sin(dp / 2) * Math.sin(dp / 2) + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dl / 2) * Math.sin(dl / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  var route = [], routeMi = 0;
+  for (var q = 0; q < RT.length; q += 2) route.push([RT[q] / 1e5, RT[q + 1] / 1e5]);
+  for (var q2 = 1; q2 < route.length; q2++) routeMi += haversine(route[q2 - 1], route[q2]);
+  function drawRoute() {
+    var lat0 = 1e9, lat1 = -1e9, lon0 = 1e9, lon1 = -1e9;
+    route.forEach(function (p) { lat0 = Math.min(lat0, p[0]); lat1 = Math.max(lat1, p[0]); lon0 = Math.min(lon0, p[1]); lon1 = Math.max(lon1, p[1]); });
+    var k = Math.cos((lat0 + lat1) / 2 * Math.PI / 180), spanX = (lon1 - lon0) * k, spanY = lat1 - lat0;
+    var VW = 600, pad = 34, sc = (VW - 2 * pad) / spanX, VH = Math.round(spanY * sc + 2 * pad);
+    function X(p) { return (pad + (p[1] - lon0) * k * sc).toFixed(1); }
+    function Y(p) { return (pad + (lat1 - p[0]) * sc).toFixed(1); }
+    var pts = route.map(function (p) { return X(p) + "," + Y(p); }).join(" "), a = route[0], z = route[route.length - 1];
+    $("routemap").innerHTML = '<svg viewBox="0 0 ' + VW + " " + VH + '" role="img" aria-label="Outline of the route, about ' + routeMi.toFixed(1) + ' miles">' +
+      '<rect width="' + VW + '" height="' + VH + '" fill="var(--land)"/>' +
+      '<polyline points="' + pts + '" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<circle cx="' + X(a) + '" cy="' + Y(a) + '" r="9" fill="var(--good)" stroke="#fff" stroke-width="3"/>' +
+      '<circle cx="' + X(z) + '" cy="' + Y(z) + '" r="9" fill="var(--ink)" stroke="#fff" stroke-width="3"/>' +
+      '<text x="' + (VW - 12) + '" y="' + (VH - 12) + '" font-size="13" text-anchor="end" fill="var(--muted)" font-family="Figtree, sans-serif">Outline only · north is up</text></svg>';
+    $("rtMiles").textContent = routeMi.toFixed(1); $("rtPts").textContent = route.length;
+  }
+  $("dlBtn").addEventListener("click", function () {
+    $("dlMsg").textContent = "Downloading. Look for white-salmon-lazy-river.gpx in your Downloads or Files app.";
+  });
+  function loadChecks(el, items, store) {
+    el.innerHTML = items.map(function (t, i) { return '<label><input type="checkbox" data-i="' + i + '"' + (store[i] ? " checked" : "") + "><span>" + t + "</span></label>"; }).join("");
+    el.onchange = function (e) {
+      var c = e.target; if (c.type !== "checkbox") return;
+      store[c.dataset.i] = c.checked; save(); loadDone();
+    };
+  }
+  var LOAD_A = [
+    "Tap Download route file above. You get a file named white-salmon-lazy-river.gpx.",
+    "Get the file to your iPhone. If you downloaded on your Mac, AirDrop the .gpx file to your phone. If you downloaded on the phone, it is already there, usually in the Files app.",
+    "On the iPhone, tap the .gpx file and choose COROS when it asks which app to open it with.",
+    "In the COROS app, tap Save. The route goes into your Route Library.",
+    "Open Explore, open the Route Library, pick the route, tap Sync with your device, then tap Send.",
+    "Look at the watch and confirm the route is there."
+  ];
+  var LOAD_B = [
+    "Pick the mapping software you like best. Any app or website that works with routes is fine.",
+    "Find its Import or Upload GPX option. It is usually in a menu for routes, maps or a plus button. Load the same file.",
+    "Compare the distance. The preview above says about <b>" + routeMi.toFixed(1) + " miles</b>. Write down what your software says.",
+    "Notice one thing your software shows that the COROS app does not, such as terrain, a different map style or an elevation graph."
+  ];
+  function loadDone() {
+    var all = function (items, st) { return items.every(function (_, i) { return st[i]; }); };
+    var d = all(LOAD_A, prog.loadA) && all(LOAD_B, prog.loadB);
+    if (d) complete("load"); else { prog.load = false; save(); renderProgress(); }
+  }
+  drawRoute(); loadChecks($("loadA"), LOAD_A, prog.loadA); loadChecks($("loadB"), LOAD_B, prog.loadB);
+
+  /* ---------- Checklists ---------- */
+  function checklist(el, items, store, doneKey, extra) {
+    el.innerHTML = items.map(function (t, i) {
+      return '<label><input type="checkbox" data-i="' + i + '"' + (store[i] ? " checked" : "") + "><span>" + t + "</span></label>";
+    }).join("");
+    el.addEventListener("change", function (e) {
+      var c = e.target; if (c.type !== "checkbox") return;
+      store[c.dataset.i] = c.checked; save();
+      var all = items.every(function (_, i) { return store[i]; });
+      if (all) complete(doneKey); else { prog[doneKey] = false; save(); renderProgress(); }
+      if (extra) extra(all);
+    });
+    if (extra) extra(items.every(function (_, i) { return store[i]; }));
+  }
+  checklist($("watchChecks"), [
+    "Bluetooth is on and the watch shows as connected in the COROS app.",
+    "The route appears when you sync from the Route Library, and the app says it sent.",
+    "On the watch, choose Run or Trail Run, then open the navigation or route option before you press start.",
+    "The line and your position dot show on the watch screen."
+  ], prog.watchChecks, "watch");
+
+  /* ---------- Mission 5 ---------- */
+  var MAZAMA = [
+    "Find both trailheads on your map: Top Spur and Mazama. Drop your start at Top Spur and your end at Mazama.",
+    "Climb first: follow the Top Spur Trail (about half a mile) up to the Pacific Crest Trail and Timberline Trail junction.",
+    "Wrap around Bald Mountain on the Timberline Trail and keep heading toward McNeil Point.",
+    "Find the Mazama Trail junction, about 3.9 miles along the McNeil Point route at roughly 5,600 ft. This trail used to be called the Cathedral Ridge Trail.",
+    "Descend the Mazama Trail about 3.1 miles to the Mazama trailhead, then check the total miles and climbing.",
+    "Name it, sync it to the watch, and confirm it appears. Plan your ride between the two trailheads before you go."
+  ];
+  var DESCHUTES = [
+    "Find Deschutes River State Recreation Area near The Dalles and drop your start at the trailhead.",
+    "Build an out-and-back along the river. The whole trail is 11.3 miles out and back, and you can turn around at any point.",
+    "Pick your turnaround from how you feel and the daylight left. Look at the total miles in the app before you save.",
+    "Name it, sync it to the watch, and confirm it appears.",
+    "Check the forecast and the trail page before you leave. Parts of the gravel path are shared with horseback riders and mountain bikers.",
+    "Screenshot the route and send it to the family chat."
+  ];
+  var DESTS = [
+    ["wildwood", "Wildwood Trail, Forest Park", "Home turf", "Right here", "Warm up on familiar ground. The Wildwood Trail runs about 30 miles along the ridge, so start from a NW Portland trailhead, climb to the ridge and build a loop or an out-and-back."],
+    ["mazama", "Top Spur to Mazama, Mount Hood", "Featured challenge", "Point to point, big views", "Build a one-way run from the Top Spur trailhead to the Mazama trailhead. You climb past Bald Mountain, then drop down the old Cathedral Ridge route, now called the Mazama Trail. You need a second car or a ride at the end, a Northwest Forest Pass at Top Spur, and a check on snow, since the Top Spur trailhead usually snows in by late November or early December.", MAZAMA, "Roughly 1.5 hr"],
+    ["deschutes", "Deschutes River Trail, The Dalles", "Winter sun pick", "Riverside gravel", "The dry east end of the Columbia Gorge is known for sunny, drier weather year-round, so this is a winter run to look forward to. The trail starts at Deschutes River State Recreation Area and runs 11.3 miles out and back, so build the distance you want. Sunny is not guaranteed in winter, so check the forecast for cold, ice and wind.", DESCHUTES, "Roughly 1 hr 45 min"]
+  ];
+  var CH_ITEMS = [
+    "Build a run of 5 to 10 miles in the COROS app, or in a site you like.",
+    "Give it a name with the place and the distance.",
+    "Look at the elevation profile and decide if the climbing suits you.",
+    "Sync it to your Apex 4 and confirm it appears on the watch.",
+    "Screenshot the route and send it to the family chat."
+  ];
+  function dest() { return DESTS.filter(function (x) { return x[0] === prog.dest; })[0]; }
+  function itemsFor(d) { return d[5] || CH_ITEMS; }
+  function renderDests() {
+    $("dests").innerHTML = DESTS.map(function (d) {
+      return '<button type="button" class="dest" data-id="' + d[0] + '" aria-pressed="' + (prog.dest === d[0]) + '"><span class="tag">' + (d[5] ? d[6] + " · " : "") + d[2] + " · " + d[3] + "</span><h3>" + d[1] + "</h3><p>" + d[4].split(". ")[0] + ".</p></button>";
+    }).join("");
+  }
+  function challengeDone() {
+    return DESTS.some(function (d) { var c = prog.checks[d[0]] || {}; return itemsFor(d).every(function (_, i) { return c[i]; }); });
+  }
+  function showBrief() {
+    var d = dest();
+    $("brief").hidden = !d; if (!d) { $("finale").classList.remove("show"); return; }
+    $("briefTitle").textContent = "Your mission: " + d[1];
+    $("briefText").textContent = d[4];
+    var items = itemsFor(d), store = prog.checks[d[0]] = prog.checks[d[0]] || {};
+    $("challengeChecks").innerHTML = items.map(function (t, i) {
+      return '<label><input type="checkbox" data-i="' + i + '"' + (store[i] ? " checked" : "") + "><span>" + t + "</span></label>";
+    }).join("");
+    $("challengeChecks").onchange = function (e) {
+      var c = e.target; if (c.type !== "checkbox") return;
+      store[c.dataset.i] = c.checked; prog.challenge = challengeDone(); save(); renderProgress();
+      $("finale").classList.toggle("show", items.every(function (_, i) { return store[i]; }));
+    };
+    $("finale").classList.toggle("show", items.every(function (_, i) { return store[i]; }));
+  }
+  $("dests").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    prog.dest = b.dataset.id; save(); renderDests(); showBrief();
+  });
+
+  renderChain(); renderDests(); showBrief(); phone(); renderProgress();
+})();
+</script>
+</body>
+</html>
