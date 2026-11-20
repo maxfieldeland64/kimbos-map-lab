@@ -168,6 +168,69 @@ footer a.board-btn { display: inline-flex; align-items: center; gap: 10px; align
 footer a.board-btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 rgba(0,0,0,.22), 0 16px 28px rgba(0,0,0,.2); }
 footer a.board-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.22), 0 3px 8px rgba(0,0,0,.2); }
 footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset: 3px; }
+
+/* ===== Multnomah restyle: stained-glass mosaic palette ===== */
+:root {
+  --bg: #dbe9df; --card: #fbfcf4; --veil: rgba(251,252,244,.9);
+  --ink: #12302c; --muted: #3d5f57; --fir: #1b5a47; --accent: #a8620a; --line: #a9c3b6; --lead: #12423a;
+  --good: #1f7a5a; --land: #e3eed8; --forest: #b9d4a8; --water: #8cc4e0; --trail: #8a5a1e;
+  --falls: #3f9fcf; --gold: #c4881c;
+  --mosaic: url("images/mosaic-light.svg");
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1e1c; --card: #12302c; --veil: rgba(18,48,44,.92);
+    --ink: #e8f1e6; --muted: #a3c2b8; --fir: #7fd0b4; --accent: #e8b94a; --line: #2a5148; --lead: #5fb7a0;
+    --good: #6fcf97; --land: #173a35; --forest: #1f4a3d; --water: #27607a; --trail: #d8b37a;
+    --falls: #5fb7e0; --gold: #e8b94a; --mosaic: url("images/mosaic-dark.svg");
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1e1c; --card: #12302c; --veil: rgba(18,48,44,.92);
+  --ink: #e8f1e6; --muted: #a3c2b8; --fir: #7fd0b4; --accent: #e8b94a; --line: #2a5148; --lead: #5fb7a0;
+  --good: #6fcf97; --land: #173a35; --forest: #1f4a3d; --water: #27607a; --trail: #d8b37a;
+  --falls: #5fb7e0; --gold: #e8b94a; --mosaic: url("images/mosaic-dark.svg");
+}
+body {
+  background: linear-gradient(180deg, rgba(63,159,207,.22), rgba(47,160,127,.12) 40%, rgba(196,136,28,.14)) fixed, var(--mosaic), var(--bg);
+  background-attachment: fixed, scroll, scroll;
+}
+header.hero {
+  margin-top: 18px; padding: 48px 26px 38px; border-radius: 22px; border: 2px solid var(--lead); color: #f4f8ee;
+  background: linear-gradient(180deg, rgba(6,32,28,.5), rgba(6,32,28,.84)), url("images/multnomah.png") center 38% / cover;
+  box-shadow: 0 10px 28px rgba(8,40,34,.3);
+}
+header.hero h1 { color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.45); }
+header.hero .kicker { color: #f3cf74; }
+header.hero .lede { color: #e6f0e6; }
+.progress { background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(6px); border-bottom: 2px solid var(--lead); }
+.pill { border: 1.5px solid var(--lead); background: var(--card); }
+.pill i { border-color: var(--lead); }
+section.card, #first-steps {
+  background: linear-gradient(90deg, var(--falls), var(--good), var(--gold)) top / 100% 6px no-repeat, linear-gradient(var(--veil), var(--veil)), var(--mosaic), var(--card);
+  border: 2px solid var(--lead); border-radius: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), 0 10px 26px rgba(8,40,34,.16);
+}
+#first-steps { padding: 26px 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+.card h2 { color: var(--ink); }
+.mission { color: var(--accent); }
+.kicker { color: var(--fir); }
+.btn { border: 1.5px solid var(--lead); }
+.btn.primary { background: var(--fir); border-color: var(--lead); }
+.coach { background: linear-gradient(135deg, rgba(63,159,207,.35), rgba(47,160,127,.0) 60%), var(--mosaic), var(--fir); border: 2px solid var(--lead); }
+.chain button, .dest, .pool button, .slot, .checks label, .brief, .goal, .explain, .stat, .trouble { border-color: var(--line); }
+.checks label { background: color-mix(in srgb, var(--card) 70%, transparent); border-width: 1.5px; }
+.chain button, .dest { background: color-mix(in srgb, var(--card) 75%, transparent); border-width: 1.5px; }
+.chain button[aria-pressed="true"], .dest[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold) inset; }
+.finale { background: linear-gradient(135deg, rgba(63,159,207,.4), transparent 60%), var(--mosaic), var(--fir); border: 2px solid var(--lead); }
+.phone { background: #0b1f1d; border: 2px solid var(--lead); }
+.routemap, .mapbox, .gpxviz svg { border-color: var(--lead); }
+footer a.board-btn { background: linear-gradient(135deg, #c4881c, #a8620a); border: 2px solid var(--lead); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .badge, :root:not([data-theme="light"]) .check, :root:not([data-theme="light"]) footer a.board-btn, :root:not([data-theme="light"]) .tools .btn.primary { color: #0a1e1c; }
+}
+:root[data-theme="dark"] .badge, :root[data-theme="dark"] .check, :root[data-theme="dark"] footer a.board-btn, :root[data-theme="dark"] .tools .btn.primary { color: #0a1e1c; }
 </style>
 </head>
 <body>
