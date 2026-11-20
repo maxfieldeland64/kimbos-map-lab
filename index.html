@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exploring the trails of Oregon, from the Pacific Coast &amp; Cascades to the High Desert - Happy Early Birthday!</title>
+<title>Kimbo's Birthday Trail Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -162,17 +162,30 @@ footer a { color: var(--fir); }
 <body>
 <div class="wrap">
   <header class="hero">
-    <div class="kicker">Route Lab for the COROS Apex 4</div>
-    <h1>Exploring the trails of Oregon, from the Pacific Coast &amp; Cascades to the High Desert - Happy Early Birthday!</h1>
-    <p class="lede">Draw a route. Send it to your watch. Go run it. Five short missions on a practice map of Forest Park. Nothing you tap here can break anything, so poke around. The last mission is a real one: build a run somewhere beautiful beyond the city, including a big point-to-point on Mount Hood and a sunny winter run on the dry east side of the Gorge.</p>
+    <div class="kicker">Kimbo's Birthday Trail Lab for the COROS Apex 4</div>
+    <h1>Exploring the trails of Oregon, from the Pacific Coast &amp; Cascades to the High Desert</h1>
+    <p class="lede">I've set up a few tasks to help you get familiar with using maps and your new watch to plan trail runs in places you've never been before. You'll learn how to draw a route, export it as a GPX file, download a GPX file, and load it onto your watch. For the final challenge, you'll build a run somewhere beautiful beyond the city, including a big point-to-point on Mount Hood or a sunny winter run on the dry east side of the Gorge.</p>
   </header>
+
+  <div class="card" id="first-steps">
+    <div class="mission">First steps</div>
+    <h2>Before you start</h2>
+    <p class="sub">Get these set up first so your watch and phone can talk to each other.</p>
+    <div class="checks">
+      <label><input type="checkbox"> <span>Your watch is nearby and connected to Wi-Fi.</span></label>
+      <label><input type="checkbox"> <span>Your phone has the COROS app downloaded and is connected to the same Wi-Fi.</span></label>
+      <label><input type="checkbox"> <span>MacBook open and connected to the Wi-Fi.</span></label>
+      <label><input type="checkbox"> <span>Close your eyes, take a deep breath, mutter to the heavens "This time spent on the screen will free me from the bounds of the screen in the future.".</span></label>
+
+    </div>
+  </div>
 
   <nav class="progress" id="progress" aria-label="Progress"></nav>
 
   <!-- MISSION 1 -->
   <section class="card" id="m-basics">
     <div class="mission">Mission 1 · The big picture</div>
-    <h2>Four things, one trip</h2>
+    <h2>Four steps, one trip</h2>
     <p class="sub">A route travels from a map to your wrist in four hops. Tap each one to see what it does.</p>
     <span class="badge">Done</span>
     <div class="chain" id="chain"></div>
@@ -189,8 +202,8 @@ footer a { color: var(--fir); }
       <div class="phone"><div class="screen" id="screen"></div></div>
       <div class="sidecol">
         <div class="coach" aria-live="polite"><div class="stepno" id="stepno"></div><h3 id="coachTitle"></h3><p id="coachText"></p></div>
-        <div class="goal" id="goal"><span class="dot"></span><span>Goal: a route of at least 3 miles that you send to your watch.</span></div>
-        <p class="note">Try turning on "Snap" so your points jump onto the nearest trail. Real route builders do the same, which keeps you off cliffs and out of blackberries.</p>
+        <div class="goal" id="goal"><span class="dot"></span><span>Goal: a route of at least 3 miles that you send to your watch. In the Coros app navigate to the Explore Tab and Create a route, and send to your watch.</span></div>
+        <p class="note">Try turning on "Snap" so your points jump onto the nearest trail. Real route builders do the same, which keeps you off cliffs and out of blackberries - most of the time.</p>
       </div>
     </div>
   </section>
@@ -535,7 +548,12 @@ footer a { color: var(--fir); }
     "Screenshot the route and send it to the family chat."
   ];
   function dest() { return DESTS.filter(function (x) { return x[0] === prog.dest; })[0]; }
-  function itemsFor(d) { return d[5] || CH_ITEMS; }
+  var TRANSFER_ITEMS = [
+    "Draw the route on the mapping tool of your choice and download it to your MacBook as a GPX file.",
+    "AirDrop the GPX file from your MacBook to your phone.",
+    "Open the file in the COROS app and sync it to your watch."
+  ];
+  function itemsFor(d) { return TRANSFER_ITEMS.concat(d[5] || CH_ITEMS); }
   function renderDests() {
     $("dests").innerHTML = DESTS.map(function (d) {
       return '<button type="button" class="dest" data-id="' + d[0] + '" aria-pressed="' + (prog.dest === d[0]) + '"><span class="tag">' + (d[5] ? d[6] + " · " : "") + d[2] + " · " + d[3] + "</span><h3>" + d[1] + "</h3><p>" + d[4].split(". ")[0] + ".</p></button>";
