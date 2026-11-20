@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Running Adventure Inspiration Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#eef1ec; --card:#fbfcf9; --ink:#17261f; --muted:#566559; --fir:#1f4a37; --accent:#e0612b; --line:#d3dacf; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0f1814; --card:#17231d; --ink:#e8efe9; --muted:#9fb1a5; --fir:#7fc3a0; --accent:#f08a57; --line:#2a3b32; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:"Figtree","Avenir Next","Segoe UI",sans-serif; font-size:17px; line-height:1.55; }
+.wrap { max-width:1000px; margin:0 auto; padding:28px 16px 48px; display:flex; flex-direction:column; gap:18px; }
+.back { color:var(--fir); font-weight:600; text-decoration:none; }
+.kicker { color:var(--accent); font-weight:600; font-size:14px; letter-spacing:.06em; text-transform:uppercase; }
+h1 { font-family:"Bricolage Grotesque","Avenir Next",sans-serif; font-size:clamp(30px,6vw,46px); line-height:1.1; margin:4px 0 8px; }
+p { margin:0; color:var(--muted); }
+.board { display:grid; grid-template-columns:repeat(2,1fr); grid-auto-rows:130px; grid-auto-flow:dense; gap:8px; }
+@media (min-width:640px) { .board { grid-template-columns:repeat(4,1fr); grid-auto-rows:150px; gap:10px; } }
+.board figure { margin:0; overflow:hidden; border-radius:14px; background:var(--card); border:1px solid var(--line); }
+.board img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s; }
+.board figure:hover img { transform:scale(1.04); }
+.tall { grid-row:span 3; } .wide { grid-column:span 2; grid-row:span 2; } .big { grid-column:span 2; grid-row:span 3; }
+.small { grid-row:span 1; }
+footer { color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← Back to the Trail Lab</a>
+  <header>
+    <div class="kicker">Kimbo's Birthday Trail Lab</div>
+    <h1>Running Adventure Inspiration Board</h1>
+    <p>Big skies, good company and trails still waiting for you. Pick one and go draw the route.</p>
+  </header>
+  <div class="board">
+    <figure class="big"><img src="images/run-3.jpg" alt="A runner coming down a granite ridge under big clouds" loading="lazy"></figure>
+    <figure class="wide"><img src="images/run-4.jpg" alt="Two runners smiling in a forest" loading="lazy"></figure>
+    <figure class="small"><img src="images/run-1.jpg" alt="A runner in a yellow rain jacket in the forest" loading="lazy"></figure>
+    <figure class="small"><img src="images/run-7.jpg" alt="A runner leaping on a sunny mountain trail" loading="lazy"></figure>
+    <figure class="big"><img src="images/run-10.jpg" alt="Three runners in front of a granite mountain valley" loading="lazy"></figure>
+    <figure class="wide"><img src="images/run-6.jpg" alt="A runner on a gravel track across open high desert" loading="lazy"></figure>
+    <figure class="small"><img src="images/run-5.jpg" alt="A runner with a shocked face on a snowy trail" loading="lazy"></figure>
+    <figure class="small"><img src="images/run-11.jpg" alt="A runner kneeling and smiling at a trail event" loading="lazy"></figure>
+    <figure class="tall"><img src="images/run-12.jpg" alt="A runner on a dirt trail above a pine valley" loading="lazy"></figure>
+    <figure class="tall"><img src="images/run-8.jpg" alt="Two runners climbing a dirt trail at golden hour" loading="lazy"></figure>
+    <figure class="wide"><img src="images/run-9.jpg" alt="A group of runners celebrating on slickrock" loading="lazy"></figure>
+    <figure class="small"><img src="images/run-2.jpg" alt="A runner on a country road" loading="lazy"></figure>
+  </div>
+  <footer>Add your own photo here after your first big run.</footer>
+</div>
+</body>
+</html>
