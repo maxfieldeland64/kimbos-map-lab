@@ -185,8 +185,9 @@ footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset
     <div class="checks">
       <label><input type="checkbox"> <span>Your watch is nearby and connected to Wi-Fi.</span></label>
       <label><input type="checkbox"> <span>Your phone has the COROS app downloaded and is connected to the same Wi-Fi.</span></label>
+      <label><input type="checkbox"> <span>Bluetooth is turned on on your phone.</span></label>
       <label><input type="checkbox"> <span>MacBook open and connected to the Wi-Fi.</span></label>
-      <label><input type="checkbox"> <span>Close your eyes, take a deep breath, mutter to the heavens "This time spent on the screen will free me from the bounds of the screen in the future.".</span></label>
+      <label><input type="checkbox"> <span>Close your eyes, take a deep breath, mutter to the heavens "This time spent on the screen will free me from the bounds of the screen in the future."</span></label>
 
     </div>
   </div>
@@ -206,14 +207,14 @@ footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset
   <!-- MISSION 2 -->
   <section class="card" id="m-build">
     <div class="mission">Mission 2 · Build in the COROS app</div>
-    <h2>Draw a 3 mile run through the forest</h2>
+    <h2>Draw a 3-mile run through the forest</h2>
     <p class="sub">This practice phone behaves like the real flow: draw on the map, save the route, find it in your Route Library, then sync it to the watch. The map is a simplified sketch of Forest Park, not for navigation.</p>
     <span class="badge">Done</span>
     <div class="lab">
       <div class="phone"><div class="screen" id="screen"></div></div>
       <div class="sidecol">
         <div class="coach" aria-live="polite"><div class="stepno" id="stepno"></div><h3 id="coachTitle"></h3><p id="coachText"></p></div>
-        <div class="goal" id="goal"><span class="dot"></span><span>Goal: a route of at least 3 miles that you send to your watch. In the Coros app navigate to the Explore Tab and Create a route, and send to your watch.</span></div>
+        <div class="goal" id="goal"><span class="dot"></span><span>Goal: a route of at least 3 miles that you send to your watch. In the COROS app navigate to the Explore Tab and Create a route, and send to your watch.</span></div>
         <p class="note">Try turning on "Snap" so your points jump onto the nearest trail. Real route builders do the same, which keeps you off cliffs and out of blackberries - most of the time.</p>
       </div>
     </div>
@@ -224,6 +225,7 @@ footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset
     <div class="mission">Mission 3 · Load a real route</div>
     <h2>Put this route on your watch and in your favorite app</h2>
     <p class="sub">Here is a ready-made route, drawn in onX Maps and saved as a GPX file. Download it, send it to your Apex 4 through the COROS app, then open the same file in whatever mapping software you like best.</p>
+    <p class="note">Want to actually run it? White Salmon is about an hour from Portland and should be sunnier than the city in winter. Pair it with a coffee stop in Hood River. Friends who live in the area recommended this trail.</p>
     <span class="badge">Done</span>
     <div class="routebox">
       <div class="routemap" id="routemap"></div>
@@ -264,9 +266,9 @@ footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset
 
   <!-- MISSION 4 -->
   <section class="card" id="m-watch">
-    <div class="mission">Mission 4 · Check the watch - Go on this run (if you want!)</div>
+    <div class="mission">Mission 4 · Check the watch</div>
     <h2>Make sure it arrived</h2>
-    <p class="sub">This area is about an hour away but should deliver sunnier skies than Portland during the winter. Pair it with a coffee stop in Hood River. This trail was reccomended by some friends that live in the area.</p>
+    <p class="sub">Before you head out, make sure the route made it to the watch and shows up when you start a run.</p>
     <span class="badge">Done</span>
     <div class="checks" id="watchChecks"></div>
     <p class="note">The exact buttons on the watch can change with software updates. COROS keeps the current steps in its <a href="https://support.coros.com/hc/en-us/articles/360039841072" target="_blank" rel="noopener">navigation guide</a>.</p>
@@ -577,13 +579,13 @@ footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset
     "Wrap around Bald Mountain on the Timberline Trail and keep heading toward McNeil Point.",
     "Find the Mazama Trail junction, about 3.9 miles along the McNeil Point route at roughly 5,600 ft. This trail used to be called the Cathedral Ridge Trail.",
     "Descend the Mazama Trail about 3.1 miles to the Mazama trailhead, then check the total miles and climbing.",
-    "Name it, sync it to the watch, and confirm it appears. Plan your ride between the two trailheads before you go."
+    "Name it with the place and the distance. Plan your ride between the two trailheads before you go."
   ];
   var DESCHUTES = [
     "Find Deschutes River State Recreation Area near The Dalles and drop your start at the trailhead.",
     "Build an out-and-back along the river. The whole trail is 11.3 miles out and back, and you can turn around at any point.",
     "Pick your turnaround from how you feel and the daylight left. Look at the total miles in the app before you save.",
-    "Name it, sync it to the watch, and confirm it appears.",
+    "Name it with the place and the distance.",
     "Check the forecast and the trail page before you leave. Parts of the gravel path are shared with horseback riders and mountain bikers.",
     "Screenshot the route and send it to the family chat."
   ];
@@ -596,12 +598,12 @@ footer a.board-btn:focus-visible { outline: 3px solid var(--fir); outline-offset
     "Screenshot the route and send it to the family chat."
   ];
   function dest() { return DESTS.filter(function (x) { return x[0] === prog.dest; })[0]; }
-  var TRANSFER_ITEMS = [
-    "Draw the route on the mapping tool of your choice and download it to your MacBook as a GPX file.",
+  var DRAW_ITEM = "Draw the route on the mapping tool of your choice and download it to your MacBook as a GPX file.";
+  var SEND_ITEMS = [
     "AirDrop the GPX file from your MacBook to your phone.",
-    "Open the file in the COROS app and sync it to your watch."
+    "Open the file in the COROS app, sync it to your watch and confirm it appears."
   ];
-  function itemsFor(d) { return TRANSFER_ITEMS.concat(d[5] || CH_ITEMS); }
+  function itemsFor(d) { return [DRAW_ITEM].concat(d[5] || CH_ITEMS, SEND_ITEMS); }
   function renderDests() {
     $("dests").innerHTML = DESTS.map(function (d) {
       return '<button type="button" class="dest" data-id="' + d[0] + '" aria-pressed="' + (prog.dest === d[0]) + '"><span class="tag">' + (d[5] ? d[6] + " · " : "") + d[2] + " · " + d[3] + "</span><h3>" + d[1] + "</h3><p>" + d[4].split(". ")[0] + ".</p></button>";
