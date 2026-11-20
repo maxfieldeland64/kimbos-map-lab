@@ -139,6 +139,13 @@ h3.part { font-size: 20px; margin-top: 4px; }
 .trouble summary { cursor: pointer; font-weight: 600; }
 .trouble p { margin-top: 10px; font-size: 16px; }
 .trouble a { color: var(--fir); }
+.gpxread code { background: var(--card); padding: 1px 5px; border-radius: 5px; font-size: 14px; }
+.gpxviz { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; align-items: start; margin-top: 12px; }
+.gpxviz svg { width: 100%; height: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.gpxviz pre { margin: 0 0 10px; padding: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; font-size: 12.5px; line-height: 1.6; overflow-x: auto; font-family: ui-monospace, Menlo, monospace; }
+.gpxviz pre span { display: block; white-space: pre; padding: 0 4px; border-radius: 4px; color: var(--muted); }
+.gpxviz pre span.on { background: var(--accent); color: #fff; font-weight: 700; }
+.gpxviz input[type=range] { width: 100%; accent-color: var(--accent); }
 /* checklists */
 .checks { display: flex; flex-direction: column; gap: 8px; }
 .checks label { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); cursor: pointer; }
@@ -227,6 +234,22 @@ footer a { color: var(--fir); }
     <div class="checks" id="loadA"></div>
     <h3 class="part">Part B · Open it in your own software</h3>
     <div class="checks" id="loadB"></div>
+    <details class="trouble gpxread">
+      <summary>Optional reading: what is a GPX file?</summary>
+      <p>GPX stands for GPS Exchange Format. It is a plain text file that follows a simple pattern, so any map app or watch can read it. You could open one in a text editor and read it yourself.</p>
+      <p>A route is just a list of <b>points</b>, in order. Each point stores a <b>latitude</b> (how far north or south) and a <b>longitude</b> (how far east or west). Some files add an <b>elevation</b> and a <b>time</b>. Your watch connects the dots to draw the line you follow.</p>
+      <p>Two flavors are common. A <b>route</b> (<code>&lt;rte&gt;</code> with <code>&lt;rtept&gt;</code> points) is a plan, like the file in this mission. A <b>track</b> (<code>&lt;trk&gt;</code> with <code>&lt;trkpt&gt;</code> points) is a recording of where you actually went, usually with times.</p>
+      <p><b>Try it:</b> drag the slider to walk along a tiny route. Watch the point move on the map and the matching line light up in the file.</p>
+      <div class="gpxviz">
+        <svg id="gpxSvg" viewBox="0 0 320 220" role="img" aria-label="A small route plotted from latitude and longitude points"></svg>
+        <div>
+          <pre id="gpxCode" aria-live="polite"></pre>
+          <input type="range" id="gpxSlider" min="0" max="7" value="0" aria-label="Point number">
+          <p class="note" id="gpxReadout"></p>
+        </div>
+      </div>
+      <p class="note">Longitude runs left to right on the map and latitude runs bottom to top. More points make a smoother line. A hand-drawn route with few points shows straight stretches.</p>
+    </details>
     <details class="trouble">
       <summary>If something looks off</summary>
       <p><b>No elevation on the watch or in the app.</b> This file has no elevation data. COROS has a fix: <a href="https://support.coros.com/hc/en-us/articles/15405567227028" target="_blank" rel="noopener">No Elevation Data After Importing GPX</a>.</p>
@@ -604,6 +627,39 @@ footer a { color: var(--fir); }
   });
 
   renderChain(); renderDests(); showBrief(); phone(); renderProgress();
+})();
+</script>
+<script>
+(function () {
+  var PTS = [[45.7210,-121.4860],[45.7225,-121.4838],[45.7231,-121.4805],[45.7222,-121.4772],[45.7240,-121.4745],[45.7262,-121.4750],[45.7271,-121.4785],[45.7268,-121.4822]];
+  var svg = document.getElementById("gpxSvg"); if (!svg) return;
+  var W = 320, H = 220, P = 28;
+  var la = PTS.map(function (p) { return p[0]; }), lo = PTS.map(function (p) { return p[1]; });
+  var minLa = Math.min.apply(null, la), maxLa = Math.max.apply(null, la), minLo = Math.min.apply(null, lo), maxLo = Math.max.apply(null, lo);
+  function X(v) { return P + (v - minLo) / (maxLo - minLo) * (W - 2 * P); }
+  function Y(v) { return H - P - (v - minLa) / (maxLa - minLa) * (H - 2 * P); }
+  var g = "";
+  for (var i = 0; i <= 4; i++) {
+    var gx = P + i * (W - 2 * P) / 4, gy = P + i * (H - 2 * P) / 4;
+    g += '<line x1="' + gx + '" y1="' + P + '" x2="' + gx + '" y2="' + (H - P) + '" stroke="var(--line)"/><line x1="' + P + '" y1="' + gy + '" x2="' + (W - P) + '" y2="' + gy + '" stroke="var(--line)"/>';
+  }
+  g += '<text x="' + (W / 2) + '" y="' + (H - 7) + '" text-anchor="middle" font-size="11" fill="var(--muted)">longitude (east →)</text>';
+  g += '<text x="10" y="' + (H / 2) + '" text-anchor="middle" font-size="11" fill="var(--muted)" transform="rotate(-90 10 ' + (H / 2) + ')">latitude (north →)</text>';
+  g += '<polyline id="gpxLine" fill="none" stroke="var(--fir)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points=""/>';
+  g += PTS.map(function (p, i) { return '<circle cx="' + X(p[1]) + '" cy="' + Y(p[0]) + '" r="4" fill="var(--card)" stroke="var(--fir)" stroke-width="2"/><text x="' + (X(p[1]) + 7) + '" y="' + (Y(p[0]) - 7) + '" font-size="10" fill="var(--muted)">' + (i + 1) + '</text>'; }).join("");
+  g += '<circle id="gpxDot" r="9" fill="var(--accent)" stroke="#fff" stroke-width="3"/>';
+  svg.innerHTML = g;
+  var code = document.getElementById("gpxCode");
+  code.innerHTML = [ '&lt;rte&gt;' ].concat(PTS.map(function (p) { return '  &lt;rtept lat="' + p[0].toFixed(4) + '" lon="' + p[1].toFixed(4) + '"/&gt;'; })).concat(['&lt;/rte&gt;']).map(function (t) { return "<span>" + t + "</span>"; }).join("");
+  var rows = code.children, sl = document.getElementById("gpxSlider");
+  function update() {
+    var n = +sl.value;
+    for (var i = 0; i < rows.length; i++) rows[i].className = (i === n + 1) ? "on" : "";
+    document.getElementById("gpxLine").setAttribute("points", PTS.slice(0, n + 1).map(function (p) { return X(p[1]) + "," + Y(p[0]); }).join(" "));
+    var d = document.getElementById("gpxDot"); d.setAttribute("cx", X(PTS[n][1])); d.setAttribute("cy", Y(PTS[n][0]));
+    document.getElementById("gpxReadout").textContent = "Point " + (n + 1) + " of " + PTS.length + ": " + PTS[n][0].toFixed(4) + "° N, " + Math.abs(PTS[n][1]).toFixed(4) + "° W";
+  }
+  sl.addEventListener("input", update); update();
 })();
 </script>
 </body>
